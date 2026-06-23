@@ -32,16 +32,7 @@ module "storage" {
   container_name       = "tfstate"
 }
 
-# Azure Container Registry Module
-module "acr" {
-  source               = "../../modules/acr"
-  resource_group_name  = azurerm_resource_group.rg.name
-  location             = azurerm_resource_group.rg.location
-  environment          = var.environment
-  acr_name             = var.acr_name
-  subnet_id            = module.network.endpoint_subnet_id
-  private_dns_zone_ids = [module.network.acr_dns_zone_id]
-}
+
 
 # Key Vault Module
 module "keyvault" {
