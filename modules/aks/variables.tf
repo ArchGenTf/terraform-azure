@@ -36,7 +36,7 @@ variable "appgw_subnet_id" {
 variable "kubernetes_version" {
   description = "The Kubernetes version for the cluster."
   type        = string
-  default     = "1.30"
+  default     = "1.30.100"
 }
 
 variable "node_count" {

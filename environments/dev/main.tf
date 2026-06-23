@@ -86,7 +86,7 @@ module "aks" {
   dns_prefix          = "aks-archgen-dev-dns"
   aks_subnet_id       = module.network.aks_subnet_id
   appgw_subnet_id     = module.network.appgw_subnet_id
-  kubernetes_version  = "1.30"
+  kubernetes_version  = "1.30.100"
   node_count          = 2
   node_size           = "Standard_D2s_v5"
 }

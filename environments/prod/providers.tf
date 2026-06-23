@@ -18,7 +18,7 @@ terraform {
   # The storage backend can be enabled after bootstrap provisioning
   # backend "azurerm" {
   #   resource_group_name  = "rg-archgen-prod"
-  #   storage_account_name = "<YOUR_STORAGE_ACCOUNT_NAME>"
+  #   storage_account_name = "archgentfstateprod"
   #   container_name       = "tfstate"
   #   key                  = "prod.terraform.tfstate"
   # }
