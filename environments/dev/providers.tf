@@ -15,12 +15,12 @@ terraform {
     }
   }
 
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-archgen-dev"
-  #   storage_account_name = "archgentfstate"
-  #   container_name       = "tfstate"
-  #   key                  = "dev.terraform.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name  = "rg-archgen-dev"
+    storage_account_name = "archgentfstate"
+    container_name       = "tfstate"
+    key                  = "dev.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {

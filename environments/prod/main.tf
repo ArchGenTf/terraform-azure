@@ -86,7 +86,7 @@ module "aks" {
   dns_prefix          = "aks-archgen-prod-dns"
   aks_subnet_id       = module.network.aks_subnet_id
   appgw_subnet_id     = module.network.appgw_subnet_id
-  kubernetes_version  = "1.30.100"
+  kubernetes_version  = "1.36"
   node_count          = 3                 # Production Node Count
-  node_size           = "Standard_D4s_v5" # Larger VM SKU for Prod Nodes
+  node_size           = "Standard_D2lds_v6"  # v6 allowed in uksouth/centralus
 }

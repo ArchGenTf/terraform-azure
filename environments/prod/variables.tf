@@ -17,7 +17,7 @@ variable "resource_group_name" {
 variable "location" {
   description = "The Azure region for prod resources."
   type        = string
-  default     = "eastus"
+  default     = "centralus"
 }
 
 variable "environment" {

@@ -36,7 +36,7 @@ variable "appgw_subnet_id" {
 variable "kubernetes_version" {
   description = "The Kubernetes version for the cluster."
   type        = string
-  default     = "1.30.100"
+  default     = "1.36"
 }
 
 variable "node_count" {
@@ -48,5 +48,5 @@ variable "node_count" {
 variable "node_size" {
   description = "The VM size of the AKS cluster nodes."
   type        = string
-  default     = "Standard_D2s_v5"
+  default     = "Standard_D2lds_v6"
 }
