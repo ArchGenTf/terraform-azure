@@ -22,26 +22,9 @@ module "network" {
   endpoint_subnet_prefix   = ["10.11.4.0/27"]
 }
 
-# Storage Account Module (TF State file host)
-module "storage" {
-  source               = "../../modules/storage"
-  resource_group_name  = azurerm_resource_group.rg.name
-  location             = azurerm_resource_group.rg.location
-  environment          = var.environment
-  storage_account_name = var.storage_account_name
-  container_name       = "tfstate"
-}
-
-# Azure Container Registry Module
-module "acr" {
-  source               = "../../modules/acr"
-  resource_group_name  = azurerm_resource_group.rg.name
-  location             = azurerm_resource_group.rg.location
-  environment          = var.environment
-  acr_name             = var.acr_name
-  subnet_id            = module.network.endpoint_subnet_id
-  private_dns_zone_ids = [module.network.acr_dns_zone_id]
-}
+# Storage Account (ACR+Blob preserved — removed from destroy scope)
+# module "storage" removed — archgentfstate preserved in Azure
+# module "acr" removed — acrarchgen preserved in Azure
 
 # Key Vault Module
 module "keyvault" {
@@ -74,6 +57,9 @@ module "bastion" {
   environment         = var.environment
   bastion_subnet_id   = module.network.bastion_subnet_id
   vm_subnet_id        = module.network.vm_subnet_id
+  sku                 = "Standard"
+  tunneling_enabled   = true
+  admin_password      = var.admin_password
 }
 
 # Private AKS Cluster with AGIC

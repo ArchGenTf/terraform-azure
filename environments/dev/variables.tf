@@ -51,3 +51,9 @@ variable "cluster_name" {
   type        = string
   default     = "aks-archgen-dev"
 }
+
+variable "admin_password" {
+  description = "The administrator password for the jumpbox VM."
+  type        = string
+  sensitive   = true
+}

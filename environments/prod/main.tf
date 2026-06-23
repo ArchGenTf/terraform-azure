@@ -32,6 +32,18 @@ module "storage" {
   container_name       = "tfstate"
 }
 
+# Container Registry Module (Premium SKU for Private Endpoint)
+module "acr" {
+  source               = "../../modules/acr"
+  resource_group_name  = azurerm_resource_group.rg.name
+  location             = azurerm_resource_group.rg.location
+  environment          = var.environment
+  acr_name             = var.acr_name
+  subnet_id            = module.network.endpoint_subnet_id
+  private_dns_zone_ids = [module.network.acr_dns_zone_id]
+}
+
+
 
 
 # Key Vault Module
@@ -65,6 +77,9 @@ module "bastion" {
   environment         = var.environment
   bastion_subnet_id   = module.network.bastion_subnet_id
   vm_subnet_id        = module.network.vm_subnet_id
+  sku                 = "Standard"
+  tunneling_enabled   = true
+  admin_password      = var.admin_password
 }
 
 # Private AKS Cluster with AGIC

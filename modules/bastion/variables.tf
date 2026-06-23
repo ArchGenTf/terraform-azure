@@ -34,3 +34,22 @@ variable "admin_username" {
   type        = string
   default     = "praveen"
 }
+
+variable "admin_password" {
+  description = "The administrator password for the jumpbox VM. Must be at least 12 characters."
+  type        = string
+  sensitive   = true
+}
+
+variable "sku" {
+  description = "The SKU of the Bastion Host."
+  type        = string
+  default     = "Basic"
+}
+
+variable "tunneling_enabled" {
+  description = "Enable tunneling for the Bastion Host."
+  type        = bool
+  default     = false
+}
+

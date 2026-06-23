@@ -16,6 +16,8 @@ resource "azurerm_bastion_host" "bastion" {
   name                = "bastion-host-${var.environment}"
   location            = var.location
   resource_group_name = var.resource_group_name
+  sku                 = var.sku
+  tunneling_enabled   = var.tunneling_enabled
 
   ip_configuration {
     name                 = "configuration"
@@ -33,6 +35,7 @@ resource "tls_private_key" "ssh" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
+
 
 # Network Interface for Jumpbox VM (No Public IP)
 resource "azurerm_network_interface" "vm" {
@@ -53,11 +56,13 @@ resource "azurerm_network_interface" "vm" {
 
 # Private Jumpbox VM
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "vm-jumpbox-${var.environment}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  size                = var.vm_size
-  admin_username      = var.admin_username
+  name                            = "vm-jumpbox-${var.environment}"
+  resource_group_name             = var.resource_group_name
+  location                        = var.location
+  size                            = var.vm_size
+  admin_username                  = var.admin_username
+  admin_password                  = var.admin_password
+  disable_password_authentication = false
   network_interface_ids = [
     azurerm_network_interface.vm.id
   ]

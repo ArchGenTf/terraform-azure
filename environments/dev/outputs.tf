@@ -27,10 +27,6 @@ output "keyvault_uri" {
   value = module.keyvault.keyvault_uri
 }
 
-output "acr_login_server" {
-  value = module.acr.acr_login_server
-}
-
 output "cosmos_db_endpoint" {
   value = module.cosmosdb.cosmos_account_name
 }

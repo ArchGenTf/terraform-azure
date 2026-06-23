@@ -28,7 +28,7 @@ output "keyvault_uri" {
 }
 
 output "acr_login_server" {
-  value = "acrarchgen.azurecr.io"
+  value = module.acr.acr_login_server
 }
 
 output "cosmos_db_endpoint" {
