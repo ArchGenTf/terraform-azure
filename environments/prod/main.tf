@@ -13,13 +13,13 @@ module "network" {
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   environment              = var.environment
-  hub_vnet_address_space   = ["10.20.0.0/16"]
-  spoke_vnet_address_space = ["10.21.0.0/16"]
-  bastion_subnet_prefix    = ["10.20.1.0/26"]
-  vm_subnet_prefix         = ["10.20.2.0/27"]
-  appgw_subnet_prefix      = ["10.20.3.0/26"]
-  aks_subnet_prefix        = ["10.21.0.0/22"]
-  endpoint_subnet_prefix   = ["10.21.4.0/27"]
+  hub_vnet_address_space   = var.hub_vnet_address_space
+  spoke_vnet_address_space = var.spoke_vnet_address_space
+  bastion_subnet_prefix    = var.bastion_subnet_prefix
+  vm_subnet_prefix         = var.vm_subnet_prefix
+  appgw_subnet_prefix      = var.appgw_subnet_prefix
+  aks_subnet_prefix        = var.aks_subnet_prefix
+  endpoint_subnet_prefix   = var.endpoint_subnet_prefix
 }
 
 # Storage Account Module (TF State file host)
@@ -77,8 +77,8 @@ module "bastion" {
   environment         = var.environment
   bastion_subnet_id   = module.network.bastion_subnet_id
   vm_subnet_id        = module.network.vm_subnet_id
-  sku                 = "Standard"
-  tunneling_enabled   = true
+  sku                 = var.bastion_sku
+  tunneling_enabled   = var.bastion_tunneling_enabled
   admin_password      = var.admin_password
 }
 
@@ -89,10 +89,10 @@ module "aks" {
   location            = azurerm_resource_group.rg.location
   environment         = var.environment
   cluster_name        = var.cluster_name
-  dns_prefix          = "aks-archgen-prod-dns"
+  dns_prefix          = var.aks_dns_prefix
   aks_subnet_id       = module.network.aks_subnet_id
   appgw_subnet_id     = module.network.appgw_subnet_id
-  kubernetes_version  = "1.36"
-  node_count          = 3                 # Production Node Count
-  node_size           = "Standard_D2lds_v6"  # v6 allowed in uksouth/centralus
+  kubernetes_version  = var.aks_kubernetes_version
+  node_count          = var.aks_node_count
+  node_size           = var.aks_node_size
 }
