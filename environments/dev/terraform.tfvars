@@ -23,3 +23,6 @@ bastion_tunneling_enabled = true
 aks_dns_prefix         = "aks-archgen-dev-dns"
 aks_kubernetes_version = "1.36"
 aks_node_size          = "Standard_D2lds_v6"
+
+# Service Bus & Slack Webhook Alert configurations
+servicebus_namespace_name = "sbarchgendev"

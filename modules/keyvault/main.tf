@@ -5,11 +5,11 @@ resource "azurerm_key_vault" "kv" {
   tenant_id                     = var.tenant_id
   sku_name                      = "standard"
   enable_rbac_authorization     = true
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   network_acls {
     bypass         = "AzureServices"
-    default_action = "Deny"
+    default_action = "Allow"
   }
 
   tags = {

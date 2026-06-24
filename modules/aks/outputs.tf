@@ -22,3 +22,7 @@ output "agic_identity_client_id" {
 output "agic_ingress_gateway_id" {
   value = azurerm_kubernetes_cluster.aks.ingress_application_gateway[0].gateway_id
 }
+
+output "grafana_url" {
+  value = azurerm_dashboard_grafana.grafana.endpoint
+}

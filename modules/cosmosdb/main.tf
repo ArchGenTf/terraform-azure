@@ -4,6 +4,7 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   resource_group_name           = var.resource_group_name
   offer_type                    = "Standard"
   kind                          = "MongoDB"
+  mongo_server_version          = "4.2"
   public_network_access_enabled = false
 
   consistency_policy {

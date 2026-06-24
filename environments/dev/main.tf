@@ -75,3 +75,20 @@ module "aks" {
   kubernetes_version  = var.aks_kubernetes_version
   node_size           = var.aks_node_size
 }
+
+module "servicebus" {
+  source                    = "../../modules/servicebus"
+  resource_group_name       = azurerm_resource_group.rg.name
+  location                  = azurerm_resource_group.rg.location
+  environment               = var.environment
+  servicebus_namespace_name = var.servicebus_namespace_name
+}
+
+module "monitoring" {
+  source              = "../../modules/monitoring"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  environment         = var.environment
+  slack_webhook_url   = var.slack_webhook_url
+  aks_cluster_id      = module.aks.cluster_id
+}

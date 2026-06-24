@@ -117,3 +117,13 @@ variable "aks_node_size" {
   description = "The VM size for the AKS default node pool nodes."
   type        = string
 }
+
+variable "servicebus_namespace_name" {
+  description = "The globally unique name of the Service Bus namespace."
+  type        = string
+}
+
+variable "slack_webhook_url" {
+  description = "The Slack webhook URL for alerts."
+  type        = string
+}
