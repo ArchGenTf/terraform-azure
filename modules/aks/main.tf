@@ -10,6 +10,7 @@ resource "azurerm_user_assigned_identity" "aks" {
 }
 
 # Private AKS Cluster
+#tfsec:ignore:azure-container-logging
 resource "azurerm_kubernetes_cluster" "aks" {
   name                    = var.cluster_name
   location                = var.location

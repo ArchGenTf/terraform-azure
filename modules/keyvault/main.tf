@@ -6,6 +6,7 @@ resource "azurerm_key_vault" "kv" {
   sku_name                      = "standard"
   enable_rbac_authorization     = true
   public_network_access_enabled = true
+  purge_protection_enabled      = true
 
   #tfsec:ignore:azure-keyvault-specify-network-acl
   network_acls {
