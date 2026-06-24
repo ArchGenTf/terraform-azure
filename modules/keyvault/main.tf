@@ -7,6 +7,7 @@ resource "azurerm_key_vault" "kv" {
   enable_rbac_authorization     = true
   public_network_access_enabled = true
   purge_protection_enabled      = true
+  soft_delete_retention_days    = 90
 
   #tfsec:ignore:azure-keyvault-specify-network-acl
   network_acls {
