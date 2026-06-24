@@ -18,10 +18,13 @@ permissions:
   id-token: write      # Required for Azure OIDC login (if configured)
   contents: read        # Required for checkout
   security-events: write # Required to upload SARIF reports to Security tab
+  actions: read         # Required for GitHub CLI to download artifacts
 
 jobs:
   security_scan:
     name: Security Scan
+    # Run scan on pushes to main OR on manual dev workflow_dispatch triggers
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -86,8 +89,8 @@ jobs:
   terraform_plan:
     name: Terraform Plan
     needs: security_scan
-    # Run plan on pushes to main OR on manual workflow_dispatch triggers
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    # Run plan on pushes to main OR on manual dev workflow_dispatch triggers
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     runs-on: ubuntu-latest
     env:
       ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
@@ -145,9 +148,9 @@ jobs:
 
   terraform_apply:
     name: Terraform Apply
-    needs: terraform_plan
+    needs: [security_scan, terraform_plan]
     # Only run apply on manual workflow_dispatch triggers (safety gate)
-    if: github.event_name == 'workflow_dispatch'
+    if: always() && github.event_name == 'workflow_dispatch' && (needs.security_scan.result == 'success' || needs.security_scan.result == 'skipped') && (needs.terraform_plan.result == 'success' || needs.terraform_plan.result == 'skipped')
     runs-on: ubuntu-latest
     env:
       ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
@@ -170,11 +173,21 @@ jobs:
         with:
           terraform_version: "1.9.0"
 
-      - name: Download TFPlan
+      - name: Download Dev TFPlan from current run
+        if: github.event.inputs.environment == 'dev'
         uses: actions/download-artifact@v4
         with:
-          name: tfplan-${{ env.ENV_NAME }}
+          name: tfplan-dev
           path: ${{ env.TF_WORKING_DIR }}
+          
+      - name: Download Prod TFPlan from latest main push
+        if: github.event.inputs.environment == 'prod'
+        run: |
+          RUN_ID=$(gh run list --workflow "Terraform CI/CD Pipeline" --branch main --status success --event push --limit 1 --json databaseId -q '.[0].databaseId')
+          echo "Downloading plan from run $RUN_ID..."
+          gh run download $RUN_ID -n tfplan-prod -d ${{ env.TF_WORKING_DIR }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Init
         run: terraform init
