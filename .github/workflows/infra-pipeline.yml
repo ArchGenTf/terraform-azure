@@ -1,0 +1,186 @@
+name: Terraform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+permissions:
+  id-token: write      # Required for Azure OIDC login (if configured)
+  contents: read        # Required for checkout
+  security-events: write # Required to upload SARIF reports to Security tab
+
+jobs:
+  security_scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Determine Environment
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "main" ]; then
+            echo "TF_WORKING_DIR=environments/prod" >> $GITHUB_ENV
+          else
+            echo "TF_WORKING_DIR=environments/dev" >> $GITHUB_ENV
+          fi
+
+      # tfsec — static analysis for Terraform misconfigs
+      - name: Run tfsec
+        id: tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: ${{ env.TF_WORKING_DIR }}
+          minimum_severity: HIGH
+          format: lovely
+          soft_fail: true   # Control the exit status manually below
+        continue-on-error: true
+
+      # Checkov — policy-as-code scanning
+      - name: Run Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ env.TF_WORKING_DIR }}
+          framework: terraform
+          soft_fail: true
+          compact: true
+          output_format: cli,sarif
+          output_file_path: console,checkov-results.sarif
+        continue-on-error: true
+
+      - name: Upload Checkov SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov-results.sarif
+        continue-on-error: true  # SARIF upload is best-effort
+
+      # Set outputs before failing so summary reports are accurate
+      - name: Set job outputs
+        id: outputs
+        if: always()
+        run: |
+          [ "${{ steps.tfsec.outcome }}" = "success" ]   && TFSEC="✅ Pass"   || TFSEC="❌ Fail"
+          [ "${{ steps.checkov.outcome }}" = "success" ] && CHECKOV="✅ Pass" || CHECKOV="❌ Fail"
+          echo "tfsec=$TFSEC"     >> "$GITHUB_OUTPUT"
+          echo "checkov=$CHECKOV" >> "$GITHUB_OUTPUT"
+
+      - name: Fail on HIGH severity findings
+        if: steps.tfsec.outcome == 'failure' || steps.checkov.outcome == 'failure'
+        run: |
+          echo "::error::Security scan detected HIGH severity issues — see tfsec/Checkov output above."
+          exit 1
+
+  terraform_plan:
+    name: Terraform Plan
+    needs: security_scan
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.det_env.outputs.env_name }}
+      tf_working_dir: ${{ steps.det_env.outputs.tf_working_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Determine Environment
+        id: det_env
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "main" ]; then
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+            echo "tf_working_dir=environments/prod" >> $GITHUB_OUTPUT
+            echo "ENV_NAME=prod" >> $GITHUB_ENV
+            echo "TF_WORKING_DIR=environments/prod" >> $GITHUB_ENV
+          else
+            echo "env_name=dev" >> $GITHUB_OUTPUT
+            echo "tf_working_dir=environments/dev" >> $GITHUB_OUTPUT
+            echo "ENV_NAME=dev" >> $GITHUB_ENV
+            echo "TF_WORKING_DIR=environments/dev" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -var="slack_webhook_url=${{ secrets.SLACK_WEBHOOK_URL }}" -out=tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Upload TFPlan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ env.ENV_NAME }}
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
+          retention-days: 1
+
+      - name: Send Slack Notification
+        if: success()
+        run: |
+          payload="{\"text\": \"🚀 *Terraform Plan Succeeded* for *${{ env.ENV_NAME }}*!\\n\\n*Workflow Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Run #${{ github.run_number }}>\\n*Status:* Plan completed successfully. Awaiting Manual Approval to Apply! ⏳\"}"
+          curl -X POST -H 'Content-type: application/json' --data "$payload" ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  terraform_apply:
+    name: Terraform Apply
+    needs: terraform_plan
+    if: github.event_name == 'push' # Only apply changes on pushes/merges, not pull requests
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.terraform_plan.outputs.env_name }} # Triggers manual approval on GitHub Environments
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Env Variables
+        run: |
+          echo "ENV_NAME=${{ needs.terraform_plan.outputs.env_name }}" >> $GITHUB_ENV
+          echo "TF_WORKING_DIR=${{ needs.terraform_plan.outputs.tf_working_dir }}" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Download TFPlan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.ENV_NAME }}
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Apply
+        run: terraform apply -input=false tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Send Slack Success Notification
+        if: success()
+        run: |
+          payload="{\"text\": \"✅ *Terraform Apply Succeeded* for *${{ env.ENV_NAME }}*!\\n\\n*Workflow Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Run #${{ github.run_number }}>\\n*Status:* Deployment Completed successfully! 🎉\"}"
+          curl -X POST -H 'Content-type: application/json' --data "$payload" ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Slack Failure Notification
+        if: failure()
+        run: |
+          payload="{\"text\": \"❌ *Terraform Apply Failed* for *${{ env.ENV_NAME }}*!\\n\\n*Workflow Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Run #${{ github.run_number }}>\\n*Status:* Action Required! 🚨\"}"
+          curl -X POST -H 'Content-type: application/json' --data "$payload" ${{ secrets.SLACK_WEBHOOK_URL }}
