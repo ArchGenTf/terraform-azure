@@ -126,6 +126,7 @@ variable "servicebus_namespace_name" {
 variable "slack_webhook_url" {
   description = "The Slack webhook URL for alerts."
   type        = string
+  sensitive   = true
 }
 
 variable "grafana_name" {

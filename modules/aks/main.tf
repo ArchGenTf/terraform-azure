@@ -79,7 +79,8 @@ resource "azurerm_dashboard_grafana" "grafana" {
   name                = var.grafana_name
   resource_group_name = var.resource_group_name
   location            = var.location
-  sku                 = "Standard"
+  sku                   = "Standard"
+  grafana_major_version = 12
   identity {
     type = "SystemAssigned"
   }

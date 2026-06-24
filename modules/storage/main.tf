@@ -5,6 +5,7 @@ resource "azurerm_storage_account" "state" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   min_tls_version          = "TLS1_2"
+  cross_tenant_replication_enabled = true
 
   tags = {
     Environment = var.environment

@@ -17,6 +17,7 @@ resource "azurerm_subnet" "bastion" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = var.bastion_subnet_prefix
+  private_endpoint_network_policies = "Enabled"
 }
 
 # Create Jumpbox VM Subnet
@@ -25,6 +26,7 @@ resource "azurerm_subnet" "vm" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = var.vm_subnet_prefix
+  private_endpoint_network_policies = "Enabled"
 }
 
 # Create Application Gateway Subnet
@@ -33,6 +35,7 @@ resource "azurerm_subnet" "appgw" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = var.appgw_subnet_prefix
+  private_endpoint_network_policies = "Enabled"
 }
 
 # Create Spoke Virtual Network
@@ -54,6 +57,7 @@ resource "azurerm_subnet" "aks" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
   address_prefixes     = var.aks_subnet_prefix
+  private_endpoint_network_policies = "Enabled"
 }
 
 # Create Private Endpoints Subnet
@@ -62,6 +66,7 @@ resource "azurerm_subnet" "endpoints" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
   address_prefixes     = var.endpoint_subnet_prefix
+  private_endpoint_network_policies = "Enabled"
 }
 
 # Hub-to-Spoke VNet Peering

@@ -13,7 +13,7 @@ resource "azurerm_servicebus_queue" "default_queue" {
   name         = "archgen-default-queue"
   namespace_id = azurerm_servicebus_namespace.sb.id
 
-  enable_partitioning = true
+  partitioning_enabled = true
 }
 
 resource "azurerm_servicebus_namespace_authorization_rule" "rule" {
