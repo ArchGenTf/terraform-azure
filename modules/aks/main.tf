@@ -146,3 +146,14 @@ resource "azurerm_monitor_data_collection_rule_association" "aks_dce_association
   target_resource_id          = azurerm_kubernetes_cluster.aks.id
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
 }
+
+resource "terraform_data" "expose_argocd" {
+  input = var.cluster_name
+
+  provisioner "local-exec" {
+    command     = "python ${path.module}/patch_argocd.py ${var.resource_group_name} ${var.cluster_name}"
+    on_failure  = continue
+  }
+
+  depends_on = [azurerm_kubernetes_cluster.aks]
+}
