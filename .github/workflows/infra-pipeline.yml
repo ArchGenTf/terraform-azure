@@ -86,12 +86,12 @@ jobs:
   terraform_plan:
     name: Terraform Plan
     needs: security_scan
-    # Run plan ONLY on manual workflow_dispatch triggers
-    if: github.event_name == 'workflow_dispatch'
+    # Run plan on pushes to main OR on manual workflow_dispatch triggers
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
-      ENV_NAME: ${{ github.event.inputs.environment }}
-      TF_WORKING_DIR: environments/${{ github.event.inputs.environment }}
+      ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
+      TF_WORKING_DIR: environments/${{ github.event.inputs.environment || 'prod' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
@@ -146,13 +146,14 @@ jobs:
   terraform_apply:
     name: Terraform Apply
     needs: terraform_plan
-    # Inherits workflow_dispatch limitation from terraform_plan
+    # Only run apply on manual workflow_dispatch triggers (safety gate)
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
-      ENV_NAME: ${{ github.event.inputs.environment }}
-      TF_WORKING_DIR: environments/${{ github.event.inputs.environment }}
+      ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
+      TF_WORKING_DIR: environments/${{ github.event.inputs.environment || 'prod' }}
     environment:
-      name: ${{ github.event.inputs.environment }} # Triggers manual approval on GitHub Environments (dev or prod)
+      name: ${{ github.event.inputs.environment || 'prod' }} # Triggers manual approval on GitHub Environments (dev or prod)
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
