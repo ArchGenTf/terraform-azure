@@ -1,15 +1,25 @@
 name: Terraform CI/CD Pipeline
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - 'dev'
+          - 'prod'
 
 permissions:
   id-token: write      # Required for Azure OIDC login (if configured)
   contents: read        # Required for checkout
   security-events: write # Required to upload SARIF reports to Security tab
+
+env:
+  ENV_NAME: ${{ github.event.inputs.environment }}
+  TF_WORKING_DIR: environments/${{ github.event.inputs.environment }}
 
 jobs:
   security_scan:
@@ -18,14 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-
-      - name: Determine Environment
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "main" ]; then
-            echo "TF_WORKING_DIR=environments/prod" >> $GITHUB_ENV
-          else
-            echo "TF_WORKING_DIR=environments/dev" >> $GITHUB_ENV
-          fi
 
       # tfsec — static analysis for Terraform misconfigs
       - name: Run tfsec
@@ -78,27 +80,9 @@ jobs:
     name: Terraform Plan
     needs: security_scan
     runs-on: ubuntu-latest
-    outputs:
-      env_name: ${{ steps.det_env.outputs.env_name }}
-      tf_working_dir: ${{ steps.det_env.outputs.tf_working_dir }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-
-      - name: Determine Environment
-        id: det_env
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "main" ]; then
-            echo "env_name=prod" >> $GITHUB_OUTPUT
-            echo "tf_working_dir=environments/prod" >> $GITHUB_OUTPUT
-            echo "ENV_NAME=prod" >> $GITHUB_ENV
-            echo "TF_WORKING_DIR=environments/prod" >> $GITHUB_ENV
-          else
-            echo "env_name=dev" >> $GITHUB_OUTPUT
-            echo "tf_working_dir=environments/dev" >> $GITHUB_OUTPUT
-            echo "ENV_NAME=dev" >> $GITHUB_ENV
-            echo "TF_WORKING_DIR=environments/dev" >> $GITHUB_ENV
-          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -136,18 +120,12 @@ jobs:
   terraform_apply:
     name: Terraform Apply
     needs: terraform_plan
-    if: github.event_name == 'push' # Only apply changes on pushes/merges, not pull requests
     runs-on: ubuntu-latest
     environment:
-      name: ${{ needs.terraform_plan.outputs.env_name }} # Triggers manual approval on GitHub Environments
+      name: ${{ github.event.inputs.environment }} # Triggers manual approval on GitHub Environments for dev or prod
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-
-      - name: Setup Env Variables
-        run: |
-          echo "ENV_NAME=${{ needs.terraform_plan.outputs.env_name }}" >> $GITHUB_ENV
-          echo "TF_WORKING_DIR=${{ needs.terraform_plan.outputs.tf_working_dir }}" >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
