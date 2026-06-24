@@ -15,3 +15,13 @@ crash.*.log
 
 # Exclude variables local files
 .terraform.tfstate.lock.info
+
+# Exclude tfplan and plan files
+*tfplan*
+tfplan
+
+# Exclude kubeconfig files
+*kubeconfig*
+
+# Exclude Python scripts in environments
+environments/**/*.py
