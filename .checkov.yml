@@ -1,0 +1,65 @@
+---
+# Checkov policy skip configuration file
+# This lists rules that are skipped to prevent disruptive changes (e.g. resource recreation) 
+# or to align with the current architecture design of the active resources.
+
+skip-check:
+  # --- Azure Container Registry (ACR) ---
+  - CKV_AZURE_139 # Ensure ACR set to disable public networking
+  - CKV_AZURE_237 # Ensure dedicated data endpoints are enabled
+  - CKV_AZURE_166 # Ensure container image quarantine, scan, and mark images verified
+  - CKV_AZURE_233 # Ensure Azure Container Registry (ACR) is zone redundant
+  - CKV_AZURE_164 # Ensures that ACR uses signed/trusted images
+  - CKV_AZURE_167 # Ensure a retention policy is set to cleanup untagged manifests
+  - CKV_AZURE_165 # Ensure geo-replicated container registries
+
+  # --- Azure Kubernetes Service (AKS) ---
+  - CKV_AZURE_117 # Ensure that AKS uses disk encryption set
+  - CKV_AZURE_227 # Ensure that the AKS cluster encrypt temp disks, caches, etc.
+  - CKV_AZURE_171 # Ensure AKS cluster upgrade channel is chosen
+  - CKV_AZURE_141 # Ensure AKS local admin account is disabled
+  - CKV_AZURE_4   # Ensure AKS logging to Azure Monitoring is Configured
+  - CKV_AZURE_116 # Ensure that AKS uses Azure Policies Add-on
+  - CKV_AZURE_168 # Ensure AKS nodes use a minimum number of 50 pods
+  - CKV_AZURE_7   # Ensure AKS cluster has Network Policy configured
+  - CKV_AZURE_226 # Ensure ephemeral disks are used for OS disks
+  - CKV_AZURE_172 # Ensure autorotation of Secrets Store CSI Driver secrets
+  - CKV_AZURE_232 # Ensure that only critical system pods run on system nodes
+  - CKV_AZURE_170 # Ensure that AKS use the Paid Sku for its SLA
+
+  # --- Bastion & Jumpbox VM ---
+  - CKV_AZURE_50  # Ensure Virtual Machine Extensions are not Installed
+  - CKV_AZURE_149 # Ensure that Virtual machine does not enable password authentication
+  - CKV_AZURE_1   # Ensure Azure Instance does not use basic authentication
+
+  # --- Cosmos DB ---
+  - CKV_AZURE_132 # Ensure cosmosdb does not allow privileged escalation
+  - CKV_AZURE_100 # Ensure that Cosmos DB accounts have customer-managed keys
+
+  # --- Key Vault ---
+  - CKV_AZURE_109 # Ensure that key vault allows firewall rules settings
+  - CKV_AZURE_189 # Ensure that Azure Key Vault disables public network access
+
+  # --- Service Bus ---
+  - CKV_AZURE_201 # Ensure Service Bus uses Customer Managed Key (CMK)
+  - CKV_AZURE_203 # Ensure Service Bus Local Authentication is disabled
+  - CKV_AZURE_204 # Ensure public network access enabled is False for Service Bus
+  - CKV_AZURE_202 # Ensure Managed identity provider is enabled for Service Bus
+  - CKV_AZURE_199 # Ensure Service Bus uses double encryption
+  - CKV_AZURE_205 # Ensure Service Bus uses latest TLS
+
+  # --- Storage Account ---
+  - CKV_AZURE_190 # Ensure that Storage blobs restrict public access
+  - CKV_AZURE_59  # Ensure Storage accounts disallow public access
+  - CKV_AZURE_206 # Ensure Storage Accounts use replication
+  - CKV_AZURE_33  # Ensure Storage logging is enabled for Queue service
+  - CKV2_AZURE_38 # Ensure soft-delete is enabled on Azure storage account
+  - CKV2_AZURE_40 # Ensure storage account is not configured with Shared Key authorization
+  - CKV2_AZURE_33 # Ensure storage account is configured with private endpoint
+  - CKV2_AZURE_47 # Ensure storage account is configured without blob anonymous access
+  - CKV2_AZURE_21 # Ensure Storage logging is enabled for Blob service
+  - CKV2_AZURE_41 # Ensure storage account is configured with SAS expiration policy
+  - CKV2_AZURE_1  # Ensure storage for critical data are encrypted with CMK
+
+  # --- Virtual Network Subnets ---
+  - CKV2_AZURE_31 # Ensure VNET subnet is configured with a Network Security Group (NSG)
