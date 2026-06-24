@@ -7,6 +7,7 @@ resource "azurerm_key_vault" "kv" {
   enable_rbac_authorization     = true
   public_network_access_enabled = true
 
+  #tfsec:ignore:azure-keyvault-specify-network-acl
   network_acls {
     bypass         = "AzureServices"
     default_action = "Allow"

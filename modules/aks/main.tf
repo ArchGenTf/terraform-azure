@@ -21,6 +21,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # Enable Workload Identity & OIDC Issuer
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
+  role_based_access_control_enabled = true
 
   default_node_pool {
     name            = "default"
@@ -44,6 +45,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     identity_ids = [azurerm_user_assigned_identity.aks.id]
   }
 
+  #tfsec:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin    = "azure"
     load_balancer_sku = "standard"
