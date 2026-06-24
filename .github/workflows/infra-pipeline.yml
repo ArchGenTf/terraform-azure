@@ -185,7 +185,7 @@ jobs:
         run: |
           RUN_ID=$(gh run list --workflow "Terraform CI/CD Pipeline" --branch main --status success --event push --limit 1 --json databaseId -q '.[0].databaseId')
           echo "Downloading plan from run $RUN_ID..."
-          gh run download $RUN_ID -n tfplan-prod -d ${{ env.TF_WORKING_DIR }}
+          gh run download $RUN_ID -n tfplan-prod -D ${{ env.TF_WORKING_DIR }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
