@@ -74,6 +74,7 @@ module "aks" {
   appgw_subnet_id     = module.network.appgw_subnet_id
   kubernetes_version  = var.aks_kubernetes_version
   node_size           = var.aks_node_size
+  grafana_name        = var.grafana_name
 }
 
 module "servicebus" {

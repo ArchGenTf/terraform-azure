@@ -76,7 +76,7 @@ resource "azurerm_monitor_workspace" "amw" {
 }
 
 resource "azurerm_dashboard_grafana" "grafana" {
-  name                = "grafana-${var.environment}"
+  name                = var.grafana_name
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Standard"
@@ -138,7 +138,7 @@ resource "azurerm_monitor_data_collection_rule_association" "aks_prometheus_asso
 }
 
 resource "azurerm_monitor_data_collection_rule_association" "aks_dce_association" {
-  name                        = "assoc-dce-${var.cluster_name}"
+  name                        = "configurationAccessEndpoint"
   target_resource_id          = azurerm_kubernetes_cluster.aks.id
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
 }

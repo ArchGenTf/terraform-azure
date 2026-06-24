@@ -27,3 +27,4 @@ aks_node_size          = "Standard_D2lds_v6"
 
 # Service Bus & Slack Webhook Alert configurations
 servicebus_namespace_name = "sbarchgenprod"
+grafana_name              = "grafana-archgen-prod"

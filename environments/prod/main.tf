@@ -95,6 +95,7 @@ module "aks" {
   kubernetes_version  = var.aks_kubernetes_version
   node_count          = var.aks_node_count
   node_size           = var.aks_node_size
+  grafana_name        = var.grafana_name
 }
 
 module "servicebus" {

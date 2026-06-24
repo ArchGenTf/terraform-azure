@@ -50,3 +50,8 @@ variable "node_size" {
   type        = string
   default     = "Standard_D2lds_v6"
 }
+
+variable "grafana_name" {
+  description = "The globally unique name of the Managed Grafana instance."
+  type        = string
+}

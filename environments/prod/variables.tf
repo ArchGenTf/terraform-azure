@@ -132,3 +132,8 @@ variable "slack_webhook_url" {
   description = "The Slack webhook URL for alerts."
   type        = string
 }
+
+variable "grafana_name" {
+  description = "The globally unique name of the Managed Grafana instance."
+  type        = string
+}
