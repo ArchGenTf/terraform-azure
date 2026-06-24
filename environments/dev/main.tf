@@ -64,17 +64,18 @@ module "bastion" {
 
 # Private AKS Cluster with AGIC
 module "aks" {
-  source              = "../../modules/aks"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  environment         = var.environment
-  cluster_name        = var.cluster_name
-  dns_prefix          = var.aks_dns_prefix
-  aks_subnet_id       = module.network.aks_subnet_id
-  appgw_subnet_id     = module.network.appgw_subnet_id
-  kubernetes_version  = var.aks_kubernetes_version
-  node_size           = var.aks_node_size
-  grafana_name        = var.grafana_name
+  source                   = "../../modules/aks"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  environment              = var.environment
+  cluster_name             = var.cluster_name
+  dns_prefix               = var.aks_dns_prefix
+  aks_subnet_id            = module.network.aks_subnet_id
+  appgw_subnet_id          = module.network.appgw_subnet_id
+  kubernetes_version       = var.aks_kubernetes_version
+  node_size                = var.aks_node_size
+  grafana_name             = var.grafana_name
+  grafana_admin_object_ids = var.grafana_admin_object_ids
 }
 
 module "servicebus" {

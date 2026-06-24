@@ -157,3 +157,10 @@ resource "terraform_data" "expose_argocd" {
 
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
+
+resource "azurerm_role_assignment" "grafana_admin" {
+  for_each             = toset(var.grafana_admin_object_ids)
+  scope                = azurerm_dashboard_grafana.grafana.id
+  role_definition_name = "Grafana Admin"
+  principal_id         = each.value
+}

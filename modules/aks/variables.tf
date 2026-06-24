@@ -55,3 +55,9 @@ variable "grafana_name" {
   description = "The globally unique name of the Managed Grafana instance."
   type        = string
 }
+
+variable "grafana_admin_object_ids" {
+  description = "A list of Microsoft Entra ID Object IDs to be assigned as Grafana Admins."
+  type        = list(string)
+  default     = []
+}

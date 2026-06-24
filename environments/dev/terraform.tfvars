@@ -27,3 +27,4 @@ aks_node_size          = "Standard_D2lds_v6"
 # Service Bus & Slack Webhook Alert configurations
 servicebus_namespace_name = "sbarchgendev"
 grafana_name              = "grafana-archgen-dev"
+grafana_admin_object_ids  = ["a4614cce-0732-4291-8d02-ac7f16ccf5d7"]
