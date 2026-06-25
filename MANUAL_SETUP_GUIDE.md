@@ -198,4 +198,4 @@ When this Ingress is applied:
    ```bash
    kubectl get ingress -n dev
    ```
-   *Look at the `ADDRESS` column to find your public Application Gateway IP.*
+   *Look at the `ADDRESS` column to find your public Application Gateway IP.*  
