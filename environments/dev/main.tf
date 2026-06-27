@@ -78,14 +78,6 @@ module "aks" {
   grafana_admin_object_ids = var.grafana_admin_object_ids
 }
 
-module "servicebus" {
-  source                    = "../../modules/servicebus"
-  resource_group_name       = azurerm_resource_group.rg.name
-  location                  = azurerm_resource_group.rg.location
-  environment               = var.environment
-  servicebus_namespace_name = var.servicebus_namespace_name
-}
-
 module "monitoring" {
   source              = "../../modules/monitoring"
   resource_group_name = azurerm_resource_group.rg.name

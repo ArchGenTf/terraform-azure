@@ -34,12 +34,3 @@ output "cosmos_db_endpoint" {
 output "grafana_url" {
   value = module.aks.grafana_url
 }
-
-output "servicebus_namespace_name" {
-  value = module.servicebus.servicebus_namespace_name
-}
-
-output "servicebus_primary_connection_string" {
-  value     = module.servicebus.servicebus_primary_connection_string
-  sensitive = true
-}
